@@ -12,12 +12,18 @@
 #include <muduo/net/InetAddress.h>
 #include <muduo/net/SocketsOps.h>
 
+#include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <sys/socket.h>
 #include <stdio.h>  // snprintf
 
 using namespace muduo;
 using namespace muduo::net;
+
+#ifndef SOL_TCP
+#define SOL_TCP IPPROTO_TCP
+#endif
 
 Socket::~Socket()
 {
@@ -26,35 +32,39 @@ Socket::~Socket()
 
 bool Socket::getTcpInfo(struct tcp_info* tcpi) const
 {
-  socklen_t len = sizeof(*tcpi);
-  memZero(tcpi, len);
-  return ::getsockopt(sockfd_, SOL_TCP, TCP_INFO, tcpi, &len) == 0;
+  // socklen_t len = sizeof(tcp_info);
+  // memZero(tcpi, len);
+  // return ::getsockopt(sockfd_, SOL_TCP, TCP_INFO, tcpi, &len) == 0;
+  return false;
 }
 
 bool Socket::getTcpInfoString(char* buf, int len) const
 {
-  struct tcp_info tcpi;
-  bool ok = getTcpInfo(&tcpi);
-  if (ok)
-  {
-    snprintf(buf, len, "unrecovered=%u "
-             "rto=%u ato=%u snd_mss=%u rcv_mss=%u "
-             "lost=%u retrans=%u rtt=%u rttvar=%u "
-             "sshthresh=%u cwnd=%u total_retrans=%u",
-             tcpi.tcpi_retransmits,  // Number of unrecovered [RTO] timeouts
-             tcpi.tcpi_rto,          // Retransmit timeout in usec
-             tcpi.tcpi_ato,          // Predicted tick of soft clock in usec
-             tcpi.tcpi_snd_mss,
-             tcpi.tcpi_rcv_mss,
-             tcpi.tcpi_lost,         // Lost packets
-             tcpi.tcpi_retrans,      // Retransmitted packets out
-             tcpi.tcpi_rtt,          // Smoothed round trip time in usec
-             tcpi.tcpi_rttvar,       // Medium deviation
-             tcpi.tcpi_snd_ssthresh,
-             tcpi.tcpi_snd_cwnd,
-             tcpi.tcpi_total_retrans);  // Total retransmits for entire connection
-  }
-  return ok;
+  return false;
+  // struct tcp_info tcpi;
+  // bool ok = getTcpInfo(&tcpi);
+  // if (ok)
+  // {
+  //   snprintf(buf, len, "unrecovered=%u "
+  //            "rto=%u ato=%u snd_mss=%u rcv_mss=%u "
+  //            "lost=%u retrans=%u rtt=%u rttvar=%u "
+  //            "sshthresh=%u cwnd=%u total_retrans=%u",
+  //            tcpi.tcpi_retransmits,  // Number of unrecovered [RTO] timeouts
+  //            tcpi.tcpi_rto,          // Retransmit timeout in usec
+  //            tcpi.tcpi_ato,          // Predicted tick of soft clock in usec
+  //            tcpi.tcpi_snd_mss,
+  //            tcpi.tcpi_rcv_mss,
+  //            tcpi.tcpi_lost,         // Lost packets
+  //            tcpi.tcpi_retrans,      // Retransmitted packets out
+  //            tcpi.tcpi_rtt,          // Smoothed round trip time in usec
+  //            tcpi.tcpi_rttvar,       // Medium deviation
+  //            tcpi.tcpi_snd_ssthresh,
+  //            tcpi.tcpi_snd_cwnd,
+  //            tcpi.tcpi_total_retrans);  // Total retransmits for entire connection
+  // }
+  // return ok;
+  // else
+  // return false;
 }
 
 void Socket::bindAddress(const InetAddress& addr)

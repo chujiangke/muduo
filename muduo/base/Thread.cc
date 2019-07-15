@@ -13,10 +13,10 @@
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <sys/prctl.h>
+//#include <sys/prctl.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
-#include <linux/unistd.h>
+//#include <linux/unistd.h>
 
 namespace muduo
 {
@@ -25,7 +25,8 @@ namespace detail
 
 pid_t gettid()
 {
-  return static_cast<pid_t>(::syscall(SYS_gettid));
+  //  return static_cast<pid_t>(::syscall(SYS_gettid));
+  return getpid();
 }
 
 void afterFork()
@@ -75,7 +76,7 @@ struct ThreadData
     latch_ = NULL;
 
     muduo::CurrentThread::t_threadName = name_.empty() ? "muduoThread" : name_.c_str();
-    ::prctl(PR_SET_NAME, muduo::CurrentThread::t_threadName);
+    //::prctl(PR_SET_NAME, muduo::CurrentThread::t_threadName);
     try
     {
       func_();

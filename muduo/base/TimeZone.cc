@@ -14,7 +14,7 @@
 
 #include <assert.h>
 //#define _BSD_SOURCE
-#include <endian.h>
+
 
 #include <stdint.h>
 #include <stdio.h>
@@ -134,7 +134,7 @@ class File : noncopyable
     ssize_t nr = ::fread(&x, 1, sizeof(int32_t), fp_);
     if (nr != sizeof(int32_t))
       throw logic_error("bad int32_t data");
-    return be32toh(x);
+    return ntohl(x);
   }
 
   uint8_t readUInt8()
@@ -290,7 +290,7 @@ struct tm TimeZone::toLocalTime(time_t seconds) const
     ::gmtime_r(&localSeconds, &localTime); // FIXME: fromUtcTime
     localTime.tm_isdst = local->isDst;
     localTime.tm_gmtoff = local->gmtOffset;
-    localTime.tm_zone = &data.abbreviation[local->arrbIdx];
+    localTime.tm_zone = const_cast<char*> (&data.abbreviation[local->arrbIdx]);
   }
 
   return localTime;
@@ -323,7 +323,11 @@ struct tm TimeZone::toUtcTime(time_t secondsSinceEpoch, bool yday)
 {
   struct tm utc;
   memZero(&utc, sizeof(utc));
-  utc.tm_zone = "GMT";
+
+  time_t rawtime;
+  struct tm * ptm = gmtime ( &rawtime );
+  memcpy(&utc, ptm, sizeof(*ptm));
+  
   int seconds = static_cast<int>(secondsSinceEpoch % kSecondsPerDay);
   int days = static_cast<int>(secondsSinceEpoch / kSecondsPerDay);
   if (seconds < 0)

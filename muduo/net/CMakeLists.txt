@@ -16,7 +16,6 @@ set(net_SRCS
   InetAddress.cc
   Poller.cc
   poller/DefaultPoller.cc
-  poller/EPollPoller.cc
   poller/PollPoller.cc
   Socket.cc
   SocketsOps.cc
@@ -53,17 +52,17 @@ set(HEADERS
   )
 install(FILES ${HEADERS} DESTINATION include/muduo/net)
 
-add_subdirectory(http)
-add_subdirectory(inspect)
+#add_subdirectory(http)
+#add_subdirectory(inspect)
 
 if(NOT CMAKE_BUILD_NO_EXAMPLES)
-  add_subdirectory(tests)
+  #add_subdirectory(tests)
 endif()
 
 if(PROTOBUF_FOUND)
-  add_subdirectory(protobuf)
-  add_subdirectory(protorpc)
+  #add_subdirectory(protobuf)
+  #add_subdirectory(protorpc)
 else()
-  add_subdirectory(protobuf EXCLUDE_FROM_ALL)
-  add_subdirectory(protorpc EXCLUDE_FROM_ALL)
+  #add_subdirectory(protobuf EXCLUDE_FROM_ALL)
+  #add_subdirectory(protorpc EXCLUDE_FROM_ALL)
 endif()

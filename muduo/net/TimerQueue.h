@@ -43,11 +43,19 @@ class TimerQueue : noncopyable
   /// repeats if @c interval > 0.0.
   ///
   /// Must be thread safe. Usually be called from other threads.
-  TimerId addTimer(TimerCallback cb,
+  TimerId addTimer(const TimerCallback& cb,
                    Timestamp when,
                    double interval);
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
+  TimerId addTimer(TimerCallback&& cb,
+                   Timestamp when,
+                   double interval);
+#endif
 
   void cancel(TimerId timerId);
+
+  int getTimeout() const;
+  void processTimers();
 
  private:
 
@@ -61,8 +69,6 @@ class TimerQueue : noncopyable
 
   void addTimerInLoop(Timer* timer);
   void cancelInLoop(TimerId timerId);
-  // called when timerfd alarms
-  void handleRead();
   // move out all expired timers
   std::vector<Entry> getExpired(Timestamp now);
   void reset(const std::vector<Entry>& expired, Timestamp now);
@@ -70,9 +76,6 @@ class TimerQueue : noncopyable
   bool insert(Timer* timer);
 
   EventLoop* loop_;
-  const int timerfd_;
-  Channel timerfdChannel_;
-  // Timer list sorted by expiration
   TimerList timers_;
 
   // for cancel()

@@ -16,10 +16,10 @@
 #include <netinet/in.h>
 
 // INADDR_ANY use (type)value casting.
-#pragma GCC diagnostic ignored "-Wold-style-cast"
+// #pragma GCC diagnostic ignored "-Wold-style-cast"
 static const in_addr_t kInaddrAny = INADDR_ANY;
 static const in_addr_t kInaddrLoopback = INADDR_LOOPBACK;
-#pragma GCC diagnostic error "-Wold-style-cast"
+// #pragma GCC diagnostic error "-Wold-style-cast"
 
 //     /* Structure describing an Internet socket address.  */
 //     struct sockaddr_in {
@@ -47,8 +47,8 @@ using namespace muduo::net;
 
 static_assert(sizeof(InetAddress) == sizeof(struct sockaddr_in6),
               "InetAddress is same size as sockaddr_in6");
-static_assert(offsetof(sockaddr_in, sin_family) == 0, "sin_family offset 0");
-static_assert(offsetof(sockaddr_in6, sin6_family) == 0, "sin6_family offset 0");
+//static_assert(offsetof(sockaddr_in, sin_family) == 0, "sin_family offset 0");
+//static_assert(offsetof(sockaddr_in6, sin6_family) == 0, "sin6_family offset 0");
 static_assert(offsetof(sockaddr_in, sin_port) == 2, "sin_port offset 2");
 static_assert(offsetof(sockaddr_in6, sin6_port) == 2, "sin6_port offset 2");
 
@@ -113,18 +113,16 @@ uint16_t InetAddress::toPort() const
   return sockets::networkToHost16(portNetEndian());
 }
 
-static __thread char t_resolveBuffer[64 * 1024];
 
 bool InetAddress::resolve(StringArg hostname, InetAddress* out)
 {
   assert(out != NULL);
   struct hostent hent;
   struct hostent* he = NULL;
-  int herrno = 0;
   memZero(&hent, sizeof(hent));
 
-  int ret = gethostbyname_r(hostname.c_str(), &hent, t_resolveBuffer, sizeof t_resolveBuffer, &he, &herrno);
-  if (ret == 0 && he != NULL)
+  he = gethostbyname(hostname.c_str());
+  if ( he != NULL)
   {
     assert(he->h_addrtype == AF_INET && he->h_length == sizeof(uint32_t));
     out->addr_.sin_addr = *reinterpret_cast<struct in_addr*>(he->h_addr);
@@ -132,10 +130,7 @@ bool InetAddress::resolve(StringArg hostname, InetAddress* out)
   }
   else
   {
-    if (ret)
-    {
-      LOG_SYSERR << "InetAddress::resolve";
-    }
+    LOG_SYSERR << "InetAddress::resolve";
     return false;
   }
 }

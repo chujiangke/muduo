@@ -8,8 +8,6 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-option(MUDUO_BUILD_EXAMPLES "Build Muduo examples" ON)
-
 set(CXX_FLAGS
  -g
  # -DVALGRIND
@@ -39,7 +37,9 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   list(APPEND CXX_FLAGS "-Wno-unused-local-typedef")
   list(APPEND CXX_FLAGS "-Wthread-safety")
   list(REMOVE_ITEM CXX_FLAGS "-rdynamic")
+  list(REMOVE_ITEM CXX_FLAGS "-Wold-style-cast")
 endif()
+
 string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 
 set(CMAKE_CXX_FLAGS_DEBUG "-O0")
@@ -98,17 +98,11 @@ include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR})
 
 string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
+
 message(STATUS "CXX_FLAGS = " ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_${BUILD_TYPE}})
 
 add_subdirectory(muduo/base)
 add_subdirectory(muduo/net)
 
-if(MUDUO_BUILD_EXAMPLES)
-  add_subdirectory(contrib)
-  add_subdirectory(examples)
-else()
-  if(CARES_INCLUDE_DIR AND CARES_LIBRARY)
-    add_subdirectory(examples/cdns)
-  endif()
-endif()
+
 
